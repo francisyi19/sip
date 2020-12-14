@@ -2,9 +2,7 @@
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
-
      https://www.apache.org/licenses/LICENSE-2.0
-
  Unless required by applicable law or agreed to in writing, software
  distributed under the License is distributed on an "AS IS" BASIS,
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -57,6 +55,26 @@ func (s *Service) Deploy(sip airshipv1.SIPCluster, machines *airshipvms.MachineL
 	// Take the data from the appropriate Machines
 	// Prepare the Config
 	fmt.Printf("Deploy Service:%v \n", s.serviceName)
+
+	if s.serviceName == "loadbalancer" {
+            fmt.Printf("Checking if sip has value")
+            fmt.Printf("%+v\n", sip)
+	    newService := NewServiceSet(sip, machines, c)
+	    fmt.Printf("new_service_rick")
+	    fmt.Printf("%+v\n", newService)
+	    serviceList := newService.ServiceList()
+	    serviceList[0].Deploy()
+            /*lb, err := newService.LoadBalancer()
+	    fmt.Printf("value_of_lb")
+	    fmt.Printf("%+v\n", &lb)
+	    lb.Deploy()
+	    fmt.Printf("%+v\n", err)*/
+	    //if err != nil {
+		//return err
+	    //} else {
+		//fmt.Printf("something wtong")
+	//}
+       }
 	return nil
 }
 

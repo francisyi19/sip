@@ -1,12 +1,8 @@
 /*
-
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-
     http://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,6 +14,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -130,7 +127,6 @@ func removeString(slice []string, s string) (result []string) {
 
 /*
 ### Gather Phase
-
 #### Identity BMH VM's
 - Gather BMH's that meet the criteria expected for the groups
 - Check for existing labeled BMH's
@@ -143,10 +139,8 @@ func removeString(slice []string, s string) (result []string) {
 -  identify and extract  the IP address ands other info as needed (***)
     -  Use it as part of the service infrastucture configuration
 - At this point I have a list of BMH's, and I have the extrapolated data I need for configuring services.
-
 ### Service Infrastructure Deploy Phase
 - Create or Updated the [LB|admin pod] with the appropriate configuration
-
 ### Label Phase
 - Label the collected hosts.
 - At this point SIPCluster is done processing a given CR, and can move on the next.
@@ -187,12 +181,22 @@ func (r *SIPClusterReconciler) gatherVBMH(sip airshipv1.SIPCluster) (*airshipvms
 }
 
 func (r *SIPClusterReconciler) deployInfra(sip airshipv1.SIPCluster, machines *airshipvms.MachineList) error {
+	// DEBUG CODE
+	logger := r.Log.WithValues("SIPCluster", r.NamespacedName)
+	logger.Info("DEBUG deploying infra services test")
+	// Try calling set.go DebugFunction
+	airshipsvc.DebugFunction()
+
 	for sName, sConfig := range sip.Spec.InfraServices {
+	        //fmt.Printf("DEBUG_RICK")
+		//fmt.Printf("%+v\n", sip.Spec.InfraServices)
 		// Instantiate
 		service, err := airshipsvc.NewService(sName, sConfig)
 		if err != nil {
 			return err
 		}
+		fmt.Printf("DEBUG_RICK_SERVICES")
+		fmt.Printf("%+v\n", service)
 
 		// Lets deploy the Service
 		err = service.Deploy(sip, machines, r.Client)
@@ -201,7 +205,6 @@ func (r *SIPClusterReconciler) deployInfra(sip airshipv1.SIPCluster, machines *a
 		}
 
 		// Did it deploy correctly, letcs check
-
 		err = service.Validate()
 		if err != nil {
 			return err
@@ -219,7 +222,6 @@ func (r *SIPClusterReconciler) finish(sip airshipv1.SIPCluster, machines *airshi
 }
 
 /**
-
 Deal with Deletion and Finalizers if any is needed
 Such as i'e what are we doing with the lables on the vBMH's
 **/
